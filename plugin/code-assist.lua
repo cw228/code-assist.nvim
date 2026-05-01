@@ -1,0 +1,2 @@
+-- code-assist.nvim is opt-in via require('code-assist').setup({...}).
+-- This file intentionally does nothing on load.

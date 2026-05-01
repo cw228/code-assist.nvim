@@ -78,12 +78,35 @@ function M.show(bufnr, row, col, text, cfg)
   return true
 end
 
+function M.show_pending(bufnr, row, col, cfg)
+  M.dismiss()
+  local text = cfg.ghost.pending_text or "completing..."
+  local opts = {
+    virt_text = { { text, cfg.ghost.hl } },
+    virt_text_pos = "inline",
+    hl_mode = "combine",
+  }
+  local ok, mark_id = pcall(vim.api.nvim_buf_set_extmark, bufnr, ns, row, col, opts)
+  if not ok then
+    opts.virt_text_pos = nil
+    mark_id = vim.api.nvim_buf_set_extmark(bufnr, ns, row, col, opts)
+  end
+  active = {
+    bufnr = bufnr,
+    row = row,
+    col = col,
+    mark_id = mark_id,
+    pending = true,
+  }
+  return true
+end
+
 function M.has_active()
   return active ~= nil
 end
 
 function M.accept()
-  if not active then return false end
+  if not active or active.pending then return false end
   local a = active
   active = nil
   pcall(vim.api.nvim_buf_del_extmark, a.bufnr, ns, a.mark_id)

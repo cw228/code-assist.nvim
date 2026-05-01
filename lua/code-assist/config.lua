@@ -23,6 +23,7 @@ M.defaults = {
     hl = "Comment",
     accept_key = "<Tab>",
     dismiss_key = "<Esc>",
+    pending_text = "inferring...",
   },
   debug = false,
 }

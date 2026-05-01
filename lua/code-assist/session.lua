@@ -142,6 +142,8 @@ function M.start(cfg)
 
   util.dump(cfg, p.nonce .. "-prompt.txt", p.text)
 
+  ghost.show_pending(bufnr, cursor[1] - 1, cursor[2], cfg)
+
   agent.find_agent({}, function(found, err)
     if s.state == STATE.cancelled then return end
     if err or not found then

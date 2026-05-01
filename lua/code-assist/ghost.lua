@@ -80,7 +80,7 @@ end
 
 function M.show_pending(bufnr, row, col, cfg)
   M.dismiss()
-  local text = cfg.ghost.pending_text or "completing..."
+  local text = cfg.ghost.pending_text
   local opts = {
     virt_text = { { text, cfg.ghost.hl } },
     virt_text_pos = "inline",

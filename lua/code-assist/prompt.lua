@@ -10,19 +10,13 @@ ABSOLUTE RULES — violating any of these breaks the integration:
 2. DO NOT modify, create, or delete any files on disk.
 3. DO NOT explain, apologise, ask questions, or add commentary before or after.
 4. DO NOT wrap your answer in Markdown fences.
-5. Wrap your completion between two sentinel lines built from this format —
-   substitute TOKEN with the request token shown below, leaving everything else
-   unchanged. Do NOT add any other characters around the sentinels (no angle
-   brackets, no quotes, no brackets, no fences):
+5. Wrap your completion between these sentinel values:
 
-     Begin sentinel: CA_BEGIN_TOKEN
-     End sentinel:   CA_END_TOKEN
+     Begin sentinel: CA_BEGIN_%s
+     End sentinel:   CA_END_%s
 
-   Your token for this request is: %s
-
-   Each sentinel must be on its own line, exactly as shown above with TOKEN
-   substituted. The body between them must be only the new code to insert at
-   %s — no surrounding context, no fences, no commentary.
+   Each sentinel must be on its own line. They must be the exact values shown above.
+   substituted. The body between them must be only the new code to insert at %s. 
 
 6. Indentation: write each line of the body with the FULL leading whitespace
    it would have if it were written into the source file at column 0. Do NOT
@@ -97,9 +91,8 @@ function M.build(bufnr, cursor, cfg)
   if filetype == "" then filetype = "text" end
 
   local text = string.format(
-    TEMPLATE,
-    nonce, token,
-    relpath, filetype, body
+    TEMPLATE, nonce, nonce,
+    token, relpath, filetype, body
   )
 
   return {

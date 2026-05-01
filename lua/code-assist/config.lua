@@ -1,7 +1,7 @@
 local M = {}
 
 M.defaults = {
-  keymap = nil,
+  keymap = "<C-q>",
   agents = { "claude", "gemini" },
   tmux = {
     paste_buffer = "code-assist",

@@ -50,7 +50,7 @@ With **lazy.nvim**:
   "cw228/code-assist.nvim",
   config = function()
     require("code-assist").setup({
-      keymap = "<leader>ai",
+      -- keymap = "<C-q>", -- <C-q> is the default, works in normal & insert mode
     })
   end,
 }
@@ -62,7 +62,7 @@ With **packer**:
 use {
   "cw228/code-assist.nvim",
   config = function()
-    require("code-assist").setup({ keymap = "<leader>ai" })
+    require("code-assist").setup({})
   end,
 }
 ```
@@ -115,7 +115,7 @@ All defaults shown:
 
 ```lua
 require("code-assist").setup({
-  keymap = nil,                       -- e.g. "<leader>ai"; nil = don't register one
+  keymap = "<C-q>",                   -- e.g. "<leader>ai" or "<C-q>"; nil = don't register one
   agents = { "claude", "gemini" },              -- order = preference
   tmux = {
     paste_buffer = "code-assist",

@@ -30,6 +30,18 @@ local function buffer_unchanged(s)
   return true
 end
 
+local function count_occurrences(haystack, needle)
+  local count = 0
+  local pos = 1
+  while true do
+    local a, b = haystack:find(needle, pos, true)
+    if not a then break end
+    count = count + 1
+    pos = b + 1
+  end
+  return count
+end
+
 function M.is_active()
   return current ~= nil and current.state ~= STATE.done and current.state ~= STATE.cancelled
 end
@@ -82,7 +94,7 @@ local function poll_once(s)
       return
     end
 
-    if out and out:find(s.end_marker, 1, true) then
+    if out and count_occurrences(out, s.end_marker) >= 2 then
       transition(s, STATE.done)
       stop_timer(s)
       vim.defer_fn(function()

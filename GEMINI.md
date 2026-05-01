@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Project-specific notes for working on `nvim-code-assist`. Companion to the
+Project-specific notes for working on `code-assist.nvim`. Companion to the
 user-facing `README.md` — this file is for someone *editing* the plugin, not
 installing it.
 
@@ -126,6 +126,4 @@ There is no automated test suite. Everything is manual.
 
 ## Deferred work
 
-- **gemini-cli support.** `agents = { "claude" }` for now. gemini's slash
-  command + MCP story needs to be wired up. Discovery code in `agent.lua`
-  is already gemini-aware.
+- **gemini-cli support.** Gemini's slash command + MCP story needs to be wired up. Discovery code in `agent.lua` is already gemini-aware.

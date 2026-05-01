@@ -2,7 +2,7 @@ local M = {}
 
 M.defaults = {
   keymap = nil,
-  agents = { "claude" },
+  agents = { "claude", "gemini" },
   tmux = {
     paste_buffer = "code-assist",
     cancel_remote = false,

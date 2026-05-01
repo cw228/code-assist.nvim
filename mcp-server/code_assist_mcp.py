@@ -1,4 +1,4 @@
-"""MCP server for nvim-code-assist.
+"""MCP server for code-assist.nvim.
 
 Bridges the nvim plugin (over a unix socket) and a Claude/Gemini agent (over
 stdio MCP). Two tools are exposed to the agent:

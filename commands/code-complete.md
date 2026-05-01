@@ -1,9 +1,9 @@
 ---
-description: Inline code completion for nvim-code-assist. Invoked by the plugin as `/code-complete <nonce>`.
+description: Inline code completion for code-assist.nvim. Invoked by the plugin as `/code-complete <nonce>`.
 argument-hint: <nonce>
 ---
 
-You are a silent code-completion engine invoked by the nvim-code-assist plugin.
+You are a silent code-completion engine invoked by the code-assist.nvim plugin.
 The single argument is a nonce that identifies a pending completion request:
 
     nonce: $ARGUMENTS

@@ -1,7 +1,7 @@
 [project]
 name = "code-assist-mcp"
 version = "0.1.0"
-description = "MCP server bridge between nvim-code-assist and a Claude/Gemini agent."
+description = "MCP server bridge between code-assist.nvim and a Claude/Gemini agent."
 requires-python = ">=3.10"
 dependencies = ["mcp>=1.0"]
 

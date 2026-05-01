@@ -48,7 +48,7 @@ function M.paste(target, buffer_name, text, on_done)
         return
       end
       util.system(
-        { "tmux", "paste-buffer", "-b", buffer_name, "-p", "-d", "-t", target },
+        { "tmux", "paste-buffer", "-b", buffer_name, "-d", "-t", target },
         {},
         function(out2)
           if out2.code ~= 0 then

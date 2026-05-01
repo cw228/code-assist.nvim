@@ -1,7 +1,7 @@
 # code-assist.nvim
 
 Inline code suggestions sourced from a terminal-based coding agent (Claude Code,
-soon also gemini-cli) running in another tmux pane.
+Gemini CLI) running in another tmux pane.
 
 When you press the configured keybind, the plugin submits a tiny request to a
 companion **MCP server** that the agent has access to, and tmux-pastes
@@ -41,21 +41,13 @@ nvim plugin ──unix socket──► MCP server ◄──stdio MCP──► cl
 There are four pieces: the nvim plugin, the Python MCP server, the
 `/code-complete` slash command, and a one-line MCP registration with Claude.
 
-### 1. Clone the repo
-
-```sh
-git clone https://github.com/<owner>/nvim-code-assist.git ~/.local/share/nvim-code-assist
-```
-
-(Any path is fine — substitute `<repo>` for it below.)
-
-### 2. Install the nvim plugin
+### 1. Install the nvim plugin
 
 With **lazy.nvim**:
 
 ```lua
 {
-  dir = "<repo>",
+  "cw228/code-assist.nvim",
   config = function()
     require("code-assist").setup({
       keymap = "<leader>ai",
@@ -68,62 +60,38 @@ With **packer**:
 
 ```lua
 use {
-  "<repo>",
+  "cw228/code-assist.nvim",
   config = function()
     require("code-assist").setup({ keymap = "<leader>ai" })
   end,
 }
 ```
 
-Open nvim once so the plugin loads.
+Open nvim once so the plugin loads. This will clone the repository to your nvim data directory (e.g., `~/.local/share/nvim/lazy/code-assist.nvim` for lazy.nvim).
 
-### 3. Install the MCP server
+### 2. Install the MCP server and register with Claude
 
-Pick one — both leave a `code-assist-mcp` binary on your `PATH`:
+Instead of manually hunting down where your plugin manager installed the repository, the plugin provides a helper command.
 
-```sh
-# pip / pipx
-pipx install <repo>/mcp-server
+Open nvim and run:
 
-# uv (recommended if you already use uv)
-uv tool install <repo>/mcp-server
-```
-
-Verify:
-
-```sh
-which code-assist-mcp
-code-assist-mcp --help
-```
-
-### 4. Symlink the slash command + print the MCP add line
-
-In nvim:
-
-```
+```vim
 :CodeAssistInstall
 ```
 
-That symlinks `<repo>/commands/code-complete.md` into
-`~/.claude/commands/code-complete.md` and prints the exact `claude mcp add`
-line for your setup. Copy-paste it into a shell — it will look like one of:
+This command will:
+1. Symlink the `/code-complete` slash command into `~/.claude/commands/`.
+2. Print the exact `pipx` or `uv` commands with the correct absolute path to install the MCP server.
+3. Print the exact `claude mcp add` command to register the server.
 
-```sh
-# if step 3 put code-assist-mcp on PATH:
-claude mcp add code-assist -- code-assist-mcp
-
-# fallback (no install required, runs the script in-place):
-claude mcp add code-assist -- python3 <repo>/mcp-server/code_assist_mcp.py
-```
-
-Confirm it registered:
+Follow the instructions printed in Neovim. Once installed and registered, verify the connection:
 
 ```sh
 claude mcp list
 # code-assist: code-assist-mcp - ✓ Connected
 ```
 
-### 5. Smoke test
+### 3. Smoke test
 
 In a tmux session:
 
@@ -148,7 +116,7 @@ All defaults shown:
 ```lua
 require("code-assist").setup({
   keymap = nil,                       -- e.g. "<leader>ai"; nil = don't register one
-  agents = { "claude" },              -- order = preference
+  agents = { "claude", "gemini" },              -- order = preference
   tmux = {
     paste_buffer = "code-assist",
     cancel_remote = false,            -- send C-c to agent on cancel

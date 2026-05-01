@@ -73,7 +73,7 @@ local function install_command()
   local lines = {
     "Next steps:",
     "  1. Install the MCP server (one-time):",
-    "       pip install " .. root .. "/mcp-server",
+    "       pipx install " .. root .. "/mcp-server",
     "     or with uv:",
     "       uv tool install " .. root .. "/mcp-server",
     "  2. Register it with Claude (one-time):",

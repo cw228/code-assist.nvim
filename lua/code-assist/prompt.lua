@@ -2,104 +2,32 @@ local util = require("code-assist.util")
 
 local M = {}
 
-local TEMPLATE = [[
-You are a silent code-completion engine invoked from a Neovim plugin.
-
-ABSOLUTE RULES — violating any of these breaks the integration:
-1. DO NOT use any tools (no Read, Edit, Write, Bash, Grep, Glob, etc.). Reply with text only.
-2. DO NOT modify, create, or delete any files on disk.
-3. DO NOT explain, apologise, ask questions, or add commentary before or after.
-4. DO NOT wrap your answer in Markdown fences.
-5. Wrap your completion between these sentinel values:
-
-     Begin sentinel: CA_BEGIN_%s
-     End sentinel:   CA_END_%s
-
-   Each sentinel must be on its own line. They must be the exact values shown above.
-   substituted. The body between them must be only the new code to insert at %s. 
-
-6. Indentation: write each line of the body with the FULL leading whitespace
-   it would have if it were written into the source file at column 0. Do NOT
-   strip indentation thinking the cursor is already past it — the plugin
-   handles aligning the first line with the cursor's column. For example, if
-   the cursor sits at the start of an empty function body that needs four
-   spaces of Python indentation, your first body line begins with four
-   spaces, not zero.
-
-If no useful completion is possible, emit the two sentinels with an empty body.
-
-CONTEXT
-File: %s
-Language: %s
-
------ BEGIN BUFFER -----
-%s
------ END BUFFER -----
-]]
-
-local function buffer_with_cursor(bufnr, row, col, token)
-  local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-  if row >= #lines then row = math.max(0, #lines - 1) end
-  local line = lines[row + 1] or ""
-  local before = line:sub(1, col)
-  local after = line:sub(col + 1)
-  lines[row + 1] = before .. token .. after
-  return table.concat(lines, "\n"), lines
+local function buffer_filepath(bufnr)
+  local name = vim.api.nvim_buf_get_name(bufnr)
+  if name == "" then return nil end
+  return name
 end
 
-local function windowed(lines, row, before_n, after_n, token, col)
-  local start = math.max(0, row - before_n)
-  local stop = math.min(#lines, row + 1 + after_n)
-  local slice = {}
-  for i = start + 1, stop do
-    slice[#slice + 1] = lines[i]
-  end
-  local rel = row - start
-  local line = slice[rel + 1] or ""
-  slice[rel + 1] = line:sub(1, col) .. token .. line:sub(col + 1)
-  return table.concat(slice, "\n")
-end
-
-function M.build(bufnr, cursor, cfg)
-  cfg = cfg or require("code-assist.config").options
+function M.build(bufnr, cursor)
   local row = cursor[1] - 1
   local col = cursor[2]
-  local token = cfg.context.cursor_token
 
-  local full_text, lines = buffer_with_cursor(bufnr, row, col, token)
-  local body
-  if #full_text <= cfg.context.max_bytes then
-    body = full_text
-  else
-    body = windowed(lines, row, cfg.context.lines_before, cfg.context.lines_after, token, col)
-  end
+  local file = buffer_filepath(bufnr)
+  local language = vim.bo[bufnr].filetype
+  if language == "" then language = "text" end
 
   local nonce = util.nonce()
-  local begin_marker = "CA_BEGIN_" .. nonce
-  local end_marker = "CA_END_" .. nonce
-
-  local relpath = vim.api.nvim_buf_get_name(bufnr)
-  if relpath ~= "" then
-    local cwd = vim.fn.getcwd()
-    if relpath:sub(1, #cwd) == cwd then
-      relpath = relpath:sub(#cwd + 2)
-    end
-  else
-    relpath = "(unnamed buffer)"
-  end
-  local filetype = vim.bo[bufnr].filetype
-  if filetype == "" then filetype = "text" end
-
-  local text = string.format(
-    TEMPLATE, nonce, nonce,
-    token, relpath, filetype, body
-  )
 
   return {
-    text = text,
-    begin_marker = begin_marker,
-    end_marker = end_marker,
     nonce = nonce,
+    trigger_text = "/code-complete " .. nonce,
+    payload = {
+      file = file or "",
+      row = row,
+      col = col,
+      language = language,
+    },
+    has_file = file ~= nil,
   }
 end
 

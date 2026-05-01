@@ -8,13 +8,6 @@ function M.system(cmd, opts, on_exit)
   end)
 end
 
-function M.strip_ansi(s)
-  s = s:gsub("\27%[[%d;?]*[%a@]", "")
-  s = s:gsub("\27%][^\7]*\7", "")
-  s = s:gsub("\27%][^\27]*\27\\", "")
-  return s
-end
-
 function M.notify(msg, level)
   vim.schedule(function()
     vim.notify("code-assist: " .. msg, level or vim.log.levels.INFO)

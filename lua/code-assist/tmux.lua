@@ -38,20 +38,6 @@ function M.list_panes(on_done)
   end)
 end
 
-function M.capture(target, lines, on_done)
-  util.system(
-    { "tmux", "capture-pane", "-t", target, "-p", "-J", "-S", "-" .. tostring(lines) },
-    {},
-    function(out)
-      if out.code ~= 0 then
-        on_done(nil, "tmux capture-pane failed: " .. (out.stderr or ""))
-        return
-      end
-      on_done(out.stdout or "")
-    end
-  )
-end
-
 function M.paste(target, buffer_name, text, on_done)
   local proc = util.system(
     { "tmux", "load-buffer", "-b", buffer_name, "-" },

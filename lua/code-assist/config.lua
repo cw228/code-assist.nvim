@@ -2,22 +2,16 @@ local M = {}
 
 M.defaults = {
   keymap = nil,
-  agents = { "claude", "gemini" },
+  agents = { "claude" },
   tmux = {
-    capture_lines = 4000,
     paste_buffer = "code-assist",
     cancel_remote = false,
   },
-  poll = {
-    interval_ms = 250,
+  request = {
     timeout_ms = 30000,
-    settle_ms = 400,
   },
-  context = {
-    max_bytes = 32 * 1024,
-    lines_before = 200,
-    lines_after = 80,
-    cursor_token = "<CURSOR/>",
+  mcp = {
+    socket_path = nil,             -- nil = ${XDG_RUNTIME_DIR:-$TMPDIR:-/tmp}/code-assist-<uid>.sock
   },
   ghost = {
     hl = "Comment",

@@ -109,7 +109,7 @@ local function install_command(opts)
   if has_claude and has_gemini then
     table.insert(lines, "  2. Register it with your agents (one-time):")
     table.insert(lines, "       claude mcp add code-assist -- " .. server_invocation)
-    table.insert(lines, "       gemini mcp add code-assist -- " .. server_invocation)
+    table.insert(lines, "       gemini mcp add --scope user code-assist \"" .. server_invocation .. "\"")
     table.insert(lines, "  3. Start a Claude or Gemini session in a tmux pane and trigger a completion from nvim.")
   elseif has_claude then
     table.insert(lines, "  2. Register it with Claude (one-time):")
@@ -117,7 +117,7 @@ local function install_command(opts)
     table.insert(lines, "  3. Start a Claude session in a tmux pane and trigger a completion from nvim.")
   elseif has_gemini then
     table.insert(lines, "  2. Register it with Gemini (one-time):")
-    table.insert(lines, "       gemini mcp add code-assist -- " .. server_invocation)
+    table.insert(lines, "       gemini mcp add --scope user code-assist \"" .. server_invocation .. "\"")
     table.insert(lines, "  3. Start a Gemini session in a tmux pane and trigger a completion from nvim.")
   end
 

@@ -142,7 +142,7 @@ require("code-assist").setup({
 - `:CodeAssistComplete` — request a completion at cursor.
 - `:CodeAssistCancel` — cancel an in-flight request and dismiss ghost text.
 - `:CodeAssistAccept` / `:CodeAssistDismiss` — same as `<Tab>` / `<Esc>` while ghost text is showing.
-- `:CodeAssistInstall` — symlink the slash command into `~/.claude/commands/` and print MCP install steps.
+- `:CodeAssistInstall [agents...]` — symlink the custom command into `~/.claude/commands/` and/or `~/.gemini/commands/` (defaults to the agents in your config) and print MCP install steps.
 - `:CodeAssistFindAgent` — diagnostic; prints which pane was selected.
 
 ## How it works

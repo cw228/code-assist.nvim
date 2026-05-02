@@ -30,7 +30,7 @@ local function setup_autocmds()
   })
 end
 
-local function install_command()
+local function install_command(opts)
   local root = plugin_root()
   local src = root .. "/commands/code-complete.md"
   if vim.fn.filereadable(src) == 0 then
@@ -38,29 +38,50 @@ local function install_command()
     return
   end
 
-  local dst_dir = vim.fn.expand("~/.claude/commands")
-  vim.fn.mkdir(dst_dir, "p")
-  local dst = dst_dir .. "/code-complete.md"
-
-  local existing = vim.uv.fs_lstat(dst)
-  if existing then
-    local link = vim.uv.fs_readlink(dst)
-    if link == src then
-      vim.notify("code-assist: skill already linked at " .. dst)
-    else
-      vim.notify(
-        "code-assist: " .. dst .. " already exists (link=" .. tostring(link) .. "); " ..
-        "remove it manually then re-run :CodeAssistInstall",
-        vim.log.levels.WARN)
-      return
-    end
+  local agents_to_install = {}
+  if opts and opts.fargs and #opts.fargs > 0 then
+    agents_to_install = opts.fargs
   else
-    local ok, err = vim.uv.fs_symlink(src, dst)
-    if not ok then
-      vim.notify("code-assist: failed to symlink: " .. tostring(err), vim.log.levels.ERROR)
-      return
+    agents_to_install = config.options.agents
+  end
+
+  local linked_any = false
+  for _, agent_name in ipairs(agents_to_install) do
+    local dst_dir
+    if agent_name == "claude" then
+      dst_dir = vim.fn.expand("~/.claude/commands")
+    elseif agent_name == "gemini" then
+      dst_dir = vim.fn.expand("~/.gemini/commands")
+    else
+      vim.notify("code-assist: unknown agent type '" .. agent_name .. "'", vim.log.levels.WARN)
+      goto continue
     end
-    vim.notify("code-assist: linked skill " .. src .. " -> " .. dst)
+
+    vim.fn.mkdir(dst_dir, "p")
+    local dst = dst_dir .. "/code-complete.md"
+
+    local existing = vim.uv.fs_lstat(dst)
+    if existing then
+      local link = vim.uv.fs_readlink(dst)
+      if link == src then
+        vim.notify("code-assist: [" .. agent_name .. "] skill already linked at " .. dst)
+        linked_any = true
+      else
+        vim.notify(
+          "code-assist: [" .. agent_name .. "] " .. dst .. " already exists (link=" .. tostring(link) .. "); " ..
+          "remove it manually then re-run :CodeAssistInstall",
+          vim.log.levels.WARN)
+      end
+    else
+      local ok, err = vim.uv.fs_symlink(src, dst)
+      if not ok then
+        vim.notify("code-assist: [" .. agent_name .. "] failed to symlink: " .. tostring(err), vim.log.levels.ERROR)
+      else
+        vim.notify("code-assist: [" .. agent_name .. "] linked skill " .. src .. " -> " .. dst)
+        linked_any = true
+      end
+    end
+    ::continue::
   end
 
   local server_invocation
@@ -76,12 +97,33 @@ local function install_command()
     "       pipx install " .. root .. "/mcp-server",
     "     or with uv:",
     "       uv tool install " .. root .. "/mcp-server",
-    "  2. Register it with Claude (one-time):",
-    "       claude mcp add code-assist -- " .. server_invocation,
-    "  3. Start a Claude session in a tmux pane and trigger a completion from nvim.",
-    "",
-    "Editor socket: " .. mcp.socket_path(),
   }
+
+  local has_claude = false
+  local has_gemini = false
+  for _, a in ipairs(agents_to_install) do
+    if a == "claude" then has_claude = true end
+    if a == "gemini" then has_gemini = true end
+  end
+
+  if has_claude and has_gemini then
+    table.insert(lines, "  2. Register it with your agents (one-time):")
+    table.insert(lines, "       claude mcp add code-assist -- " .. server_invocation)
+    table.insert(lines, "       gemini mcp add code-assist -- " .. server_invocation)
+    table.insert(lines, "  3. Start a Claude or Gemini session in a tmux pane and trigger a completion from nvim.")
+  elseif has_claude then
+    table.insert(lines, "  2. Register it with Claude (one-time):")
+    table.insert(lines, "       claude mcp add code-assist -- " .. server_invocation)
+    table.insert(lines, "  3. Start a Claude session in a tmux pane and trigger a completion from nvim.")
+  elseif has_gemini then
+    table.insert(lines, "  2. Register it with Gemini (one-time):")
+    table.insert(lines, "       gemini mcp add code-assist -- " .. server_invocation)
+    table.insert(lines, "  3. Start a Gemini session in a tmux pane and trigger a completion from nvim.")
+  end
+
+  table.insert(lines, "")
+  table.insert(lines, "Editor socket: " .. mcp.socket_path())
+
   vim.notify(table.concat(lines, "\n"))
 end
 
@@ -90,7 +132,7 @@ local function setup_commands()
   vim.api.nvim_create_user_command("CodeAssistCancel", function() M.cancel() end, {})
   vim.api.nvim_create_user_command("CodeAssistAccept", function() M.accept() end, {})
   vim.api.nvim_create_user_command("CodeAssistDismiss", function() M.dismiss() end, {})
-  vim.api.nvim_create_user_command("CodeAssistInstall", install_command, {})
+  vim.api.nvim_create_user_command("CodeAssistInstall", install_command, { nargs = "*" })
   vim.api.nvim_create_user_command("CodeAssistFindAgent", function()
     agent.invalidate_cache()
     agent.find_agent({}, function(found, err)

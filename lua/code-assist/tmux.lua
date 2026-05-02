@@ -40,24 +40,14 @@ end
 
 function M.paste(target, buffer_name, text, on_done)
   local proc = util.system(
-    { "tmux", "load-buffer", "-b", buffer_name, "-" },
-    { stdin = text },
+    { "tmux", "send-keys", "-t", target, "-l", text },
+    {},
     function(out)
       if out.code ~= 0 then
-        on_done(false, "tmux load-buffer failed: " .. (out.stderr or ""))
+        on_done(false, "tmux send-keys failed: " .. (out.stderr or ""))
         return
       end
-      util.system(
-        { "tmux", "paste-buffer", "-p", "-b", buffer_name, "-d", "-t", target },
-        {},
-        function(out2)
-          if out2.code ~= 0 then
-            on_done(false, "tmux paste-buffer failed: " .. (out2.stderr or ""))
-            return
-          end
-          on_done(true)
-        end
-      )
+      on_done(true)
     end
   )
   return proc

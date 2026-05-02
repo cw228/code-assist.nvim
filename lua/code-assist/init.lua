@@ -84,12 +84,7 @@ local function install_command(opts)
     ::continue::
   end
 
-  local server_invocation
-  if vim.fn.executable("code-assist-mcp") == 1 then
-    server_invocation = "code-assist-mcp"
-  else
-    server_invocation = "python3 " .. root .. "/mcp-server/code_assist_mcp.py"
-  end
+  local server_invocation = "code-assist-mcp"
 
   local lines = {
     "Next steps:",
